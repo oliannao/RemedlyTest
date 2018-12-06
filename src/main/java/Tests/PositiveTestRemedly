@@ -1,0 +1,94 @@
+package Tests;
+
+import Pages.LoginPage;
+import Pages.StartPage;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+import java.util.concurrent.TimeUnit;
+
+public class PositiveTestRemedly {
+
+  private WebDriver driver;
+  private final static String LOGIN = "alla_pugacheva@test.com";
+  private final static String PASSWORD = "d123456";
+  private final static String START_PAGE = "patient-dashboard";
+  private final static String INBOX_PAGE = "inbox#create";
+  private final static String SUBJECT = "subject";
+  private final static String MESSAGE = "Hello!";
+
+
+  @BeforeClass
+  public void initBrowes() {
+    System.setProperty("webdriver.gecko.driver", "/usr/local/bin");
+    FirefoxOptions options = new FirefoxOptions().setLegacy(true);
+    driver = new FirefoxDriver(options);
+    driver.manage().timeouts().implicitlyWait(40, TimeUnit.SECONDS);
+  }
+
+  @Test(description = "Open LoginPage. Check the login, the password, the button 'LOG IN'. Check send message.")
+  public void checkLoginSendMessage() throws InterruptedException {
+    LoginPage loginPage = new LoginPage(driver)
+        .openRemedlyLoginPage();
+    boolean isLoginLoginPageDisplayed = loginPage.isLoginDisplayed();
+    Assert.assertTrue(isLoginLoginPageDisplayed,
+        "The login field is not displayed.");
+
+
+    boolean isLoginLoginPageEnabled = loginPage.isLoginEnabled();
+    Assert.assertTrue(isLoginLoginPageEnabled,
+        "The login field is not enabled.");
+
+
+    boolean isPasswordLoginPageDisplayed = loginPage.isPasswordDisplayed();
+    Assert.assertTrue(isPasswordLoginPageDisplayed,
+        "The password field is not displayed.");
+
+
+    boolean isPasswordLoginPageEnabled = loginPage.isPasswordEnabled();
+    Assert.assertTrue(isPasswordLoginPageEnabled,
+        "The password field is not enabled.");
+
+
+    boolean isLoginButtonLoginPageDisplayed = loginPage.isLoginButtonDisplayed();
+    Assert.assertTrue(isLoginButtonLoginPageDisplayed,
+        "The login button is not displayed.");
+
+
+    boolean isLoginButtonLoginPageEnabled = loginPage.isLoginButtonEnabled();
+    Assert.assertFalse(isLoginButtonLoginPageEnabled,
+        "The login button is enabled.");
+
+
+    isLoginButtonLoginPageEnabled = loginPage.typeLogin(LOGIN)
+        .typePassword(PASSWORD)
+        .isLoginButtonEnabled();
+    Assert.assertTrue(isLoginButtonLoginPageEnabled,
+        "The login button is not enabled.");
+
+
+    StartPage startPage = loginPage.clickLoginButtonOpenStartPage();
+    String currentUrl = driver.getCurrentUrl();
+    boolean isCurrentUrl = currentUrl.contains(START_PAGE);
+    Assert.assertTrue(isCurrentUrl,
+        "Start page doesn't open.");
+
+
+    startPage.openPatientMessagesPage()
+        .completeFormMessage(SUBJECT, MESSAGE);
+    currentUrl = driver.getCurrentUrl();
+    isCurrentUrl = currentUrl.contains(INBOX_PAGE);
+    Assert.assertTrue(isCurrentUrl,
+        "PatientMessages page doesn't open.");
+  }
+
+  @AfterClass(description = "Стоп вебдрайвер", alwaysRun = true)
+  public void tearDown() {
+    driver.close();
+  }
+}
